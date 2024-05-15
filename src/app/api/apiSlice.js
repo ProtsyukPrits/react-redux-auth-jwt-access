@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials, logOut } from "../../features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:3000",
+  baseUrl: "https://nodejs-jwt-auth-oemb.onrender.com",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;
@@ -25,7 +25,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       const user = api.getState().auth.user;
       // store the new token
       api.dispatch(setCredentials({ ...refreshResult.data, user }));
-      // retry the originals query with new access token
+      // retry the original query with new access token
       result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logOut());

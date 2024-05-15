@@ -6,8 +6,8 @@ import { setCredentials } from "./authSlice";
 import { useLoginMutation } from "./authApiSlice";
 
 const Login = () => {
-  const userRef = useRef();
-  const errRef = useRef();
+  const userRef = useRef(null);
+  const errRef = useRef(null);
   const [user, setUser] = useState("");
   const [pwd, setPwd] = useState("");
   const [errMsg, setErrMsg] = useState("");
@@ -17,7 +17,7 @@ const Login = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    useRef.current.focus();
+    userRef.current.focus();
   }, []);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const Login = () => {
   }, [user, pwd]);
 
   const handleSubmit = async (e) => {
-    e.preventDefalut();
+    e.preventDefault();
 
     try {
       const userData = await login({ user, pwd }).unwrap();
@@ -33,12 +33,13 @@ const Login = () => {
       setUser("");
       setPwd("");
       navigate("/welcome");
-    } catch (error) {
-      if (!error?.response) {
+    } catch (err) {
+      if (!err?.originalStatus) {
+        // isLoading: true until timeout occurs
         setErrMsg("No Server Response");
-      } else if (error.response?.status === 400) {
+      } else if (err.originalStatus === 400) {
         setErrMsg("Missing Username or Password");
-      } else if (error.response?.status === 401) {
+      } else if (err.originalStatus === 401) {
         setErrMsg("Unauthorized");
       } else {
         setErrMsg("Login Failed");
@@ -48,6 +49,7 @@ const Login = () => {
   };
 
   const handleUserInput = (e) => setUser(e.target.value);
+
   const handlePwdInput = (e) => setPwd(e.target.value);
 
   const content = isLoading ? (
@@ -61,9 +63,10 @@ const Login = () => {
       >
         {errMsg}
       </p>
+
       <h1>Employee Login</h1>
 
-      <form autoComplete="off" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="username">Username:</label>
         <input
           type="text"
@@ -71,6 +74,7 @@ const Login = () => {
           ref={userRef}
           value={user}
           onChange={handleUserInput}
+          autoComplete="off"
           required
         />
 
@@ -89,5 +93,4 @@ const Login = () => {
 
   return content;
 };
-
 export default Login;
